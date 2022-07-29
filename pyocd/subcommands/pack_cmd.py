@@ -84,6 +84,23 @@ class PackCleanSubcommand(PackSubcommandBase):
         print()
         return 0
 
+class PackFolderSubcommand(PackSubcommandBase):
+    """@brief `pyocd pack clean` subcommand."""
+
+    NAMES = ['folder-name']
+    HELP = "Get folder name of CMSIS pack"
+
+    @classmethod
+    def get_args(cls) -> List[argparse.ArgumentParser]:
+        """@brief Add this subcommand to the subparsers object."""
+        parser = argparse.ArgumentParser(description=cls.HELP, add_help=False)
+        return [cls.CommonOptions.LOGGING, parser]
+
+    def invoke(self) -> int:
+        """@brief Handle 'clean' subcommand."""
+        cache = self._get_cache()
+        return cache.data_path
+
 class PackUpdateSubcommand(PackSubcommandBase):
     """@brief `pyocd pack update` subcommand."""
 
@@ -274,6 +291,7 @@ class PackSubcommand(PackSubcommandBase):
         PackInstallSubcommand,
         PackShowSubcommand,
         PackUpdateSubcommand,
+        PackFolderSubcommand,
         ]
 
     @classmethod
@@ -285,6 +303,8 @@ class PackSubcommand(PackSubcommandBase):
         pack_operations = pack_parser.add_argument_group('pack operations')
         pack_operations.add_argument("-c", "--clean", action='store_true',
             help="(Deprecated; use clean subcommand.) Erase all stored pack information.")
+        pack_operations.add_argument("-fn", "--folder-name", action='store_true',
+            help="(Deprecated; use folder-name subcommand.) Get cmsis folder name.")
         pack_operations.add_argument("-u", "--update", action='store_true',
             help="(Deprecated; use update subcommand.) Update the pack index.")
         pack_operations.add_argument("-s", "--show", action='store_true',
@@ -305,7 +325,7 @@ class PackSubcommand(PackSubcommandBase):
     def invoke(self) -> int:
         """@brief Handle 'pack' subcommand."""
 
-        if not any([self._args.clean, self._args.update, self._args.show, bool(self._args.find_devices), bool(self._args.install_devices)]):
+        if not any([self._args.clean, self._args.update,  self._args.show, bool(self._args.find_devices), bool(self._args.install_devices), bool(self._args.folder_name)]):
             self.parser.print_help()
             return 0
 
